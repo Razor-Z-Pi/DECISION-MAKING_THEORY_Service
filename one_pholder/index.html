@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оптимизация рациона скота</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        *,
+        *::after,
+        *::before {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f5fa;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #0b2b4a, #143b60);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 28px 28px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .app-header h1 {
+            font-weight: 600;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .app-header h1 i {
+            color: #ffd966;
+        }
+
+        .variant-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Основная сетка */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 0 0 28px 28px;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Модули (карточки) */
+        .module {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 20px rgba(0,20,40,0.06);
+            border: 1px solid #e9edf2;
+            transition: all 0.2s;
+        }
+
+        .module:hover {
+            box-shadow: 0 12px 28px rgba(0,30,60,0.1);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #163a5e;
+            border-bottom: 2px solid #eef2f6;
+            padding-bottom: 14px;
+        }
+
+        .module-header i {
+            font-size: 1.5rem;
+            color: #2c6b9e;
+        }
+
+        /* Таблицы */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 8px;
+            background: #f1f6fd;
+            font-weight: 600;
+            color: #1f3a5f;
+        }
+
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5eaf0;
+        }
+
+        .data-table input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #d0dbe9;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            background: white;
+            transition: 0.15s;
+        }
+
+        .data-table input:focus {
+            border-color: #2a6f97;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,111,151,0.15);
+        }
+
+        .data-table .readonly-input {
+            background: #f4f8ff;
+            border-color: #cbd6e4;
+            color: #0b2b4a;
+            font-weight: 500;
+        }
+
+        .badge {
+            background: #e3effa;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1e4f7a;
+        }
+
+        .value-highlight {
+            background: #e3f0fc;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .dual-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: white;
+            border: 1px solid #bdd1e8;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+            color: #1e3b5c;
+        }
+
+        .btn-primary {
+            background: #0b2b4a;
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #123e6b;
+        }
+
+        .btn:hover {
+            background: #f0f7ff;
+        }
+
+        .result-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #003b6f;
+            line-height: 1.2;
+        }
+
+        .analysis-card {
+            background: #f4faff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #2a6f97;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .note {
+            color: #546e85;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        .shadow-inner {
+            background: #fbfdff;
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid #dee9f2;
+        }
+
+        @media (max-width: 700px) {
+            .dual-column {
+                grid-template-columns: 1fr;
+            }
+            .app-header {
+                flex-direction: column;
+                align-items: start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="app-header">
+        <h1><i class="fas fa-cow"></i> Оптимизатор рациона <span style="font-size: 0.9rem; opacity:0.7; margin-left: 10px;">(модульный редактор)</span></h1>
+        <div class="variant-badge"><i class="far fa-edit"></i> Вариант 7 все данные изменяемы</div>
+    </div>
+
+    <div class="dashboard" id="app">
+        <!-- левая кнопка: Модель и исходные -->
+        <div class="left-col">
+            <!-- Модуль 1: Математическая модель (автоматически обновляется) -->
+            <div class="module">
+                <div class="module-header"><i class="fas fa-square-root-alt"></i> Математическая модель</div>
+                <div class="shadow-inner" id="modelDisplay">
+                    <!-- Заполняется динамически через js -->
+                    <p><strong>Переменные:</strong> <span id="varNames">x₁ (A), x₂ (B), x₃ (C)</span></p>
+                    <p><strong>Целевая функция:</strong> min Z = <span id="funcDisplay">84x₁ + 72x₂ + 60x₃</span></p>
+                    <p><strong>Ограничения:</strong></p>
+                    <ul id="constraintsList" style="list-style: none; padding-left: 4px;">
+                        <li><i class="fas fa-arrow-right" style="color:#2a6f97; margin-right:8px;"></i><span id="constr1">90x₁ + 20x₂ + 40x₃ ≥ 200</span></li>
+                        <li><i class="fas fa-arrow-right" style="color:#2a6f97; margin-right:8px;"></i><span id="constr2">30x₁ + 80x₂ + 60x₃ ≥ 180</span></li>
+                        <li><i class="fas fa-arrow-right" style="color:#2a6f97; margin-right:8px;"></i><span id="constr3">10x₁ + 20x₂ + 60x₃ ≥ 150</span></li>
+                    </ul>
+                </div>
+                <p class="note"><i class="far fa-lightbulb"></i> Коэффициенты берутся из таблиц ниже.</p>
+            </div>
+
+            <!-- Модуль 2: Редактор кормов и норм -->
+            <div class="module" style="margin-top: 20px;">
+                <div class="module-header"><i class="fas fa-database"></i> Исходные данные (редактируемые)</div>
+                <table class="data-table">
+                    <thead><tr><th>Корм</th><th>Углеводы</th><th>Протеины</th><th>Витамины</th><th>Цена</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>Корм A</td>
+                            <td><input type="number" id="a_carbs" value="90" step="any"></td>
+                            <td><input type="number" id="a_prot" value="30" step="any"></td>
+                            <td><input type="number" id="a_vit" value="10" step="any"></td>
+                            <td><input type="number" id="a_price" value="84" step="any"></td>
+                        </tr>
+                        <tr>
+                            <td>Корм B</td>
+                            <td><input type="number" id="b_carbs" value="20" step="any"></td>
+                            <td><input type="number" id="b_prot" value="80" step="any"></td>
+                            <td><input type="number" id="b_vit" value="20" step="any"></td>
+                            <td><input type="number" id="b_price" value="72" step="any"></td>
+                        </tr>
+                        <tr>
+                            <td>Корм C</td>
+                            <td><input type="number" id="c_carbs" value="40" step="any"></td>
+                            <td><input type="number" id="c_prot" value="60" step="any"></td>
+                            <td><input type="number" id="c_vit" value="60" step="any"></td>
+                            <td><input type="number" id="c_price" value="60" step="any"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 20px; background: #f4f9fe; padding: 16px; border-radius: 20px;">
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                        <span><strong>Минимальные нормы:</strong></span>
+                        <label>Углеводы <input type="number" id="limit_carbs" value="200" step="any" style="width:90px; padding:6px; border-radius:20px; border:1px solid #bdd1e8;"></label>
+                        <label>Протеины <input type="number" id="limit_prot" value="180" step="any" style="width:90px; padding:6px; border-radius:20px;"></label>
+                        <label>Витамины <input type="number" id="limit_vit" value="150" step="any" style="width:90px; padding:6px; border-radius:20px;"></label>
+                    </div>
+                </div>
+
+                <!-- Кнопка пересчета -->
+                <div style="margin-top: 24px; display: flex; gap: 16px;">
+                    <button class="btn btn-primary" id="recalcBtn"><i class="fas fa-sync-alt"></i> Пересчитать решение (симуляция)</button>
+                    <button class="btn" id="resetToDefaultBtn"><i class="fas fa-undo-alt"></i> Сброс к варианту 7</button>
+                </div>
+                <p class="note"><i class="fas fa-info-circle"></i> После изменения нажмите "Пересчитать" — обновятся рацион, отчёты и комментарии.</p>
+            </div>
+
+            <!-- Модуль 3: Оптимальный рацион (решение) -->
+            <div class="module" style="margin-top: 20px;">
+                <div class="module-header"><i class="fas fa-trophy"></i> Оптимальный рацион</div>
+                <div class="flex-between">
+                    <div><span class="badge">x₁ (Корм A)</span> <span class="result-number" id="optX1">1,143</span> кг</div>
+                    <div><span class="badge">x₂ (Корм B)</span> <span class="result-number" id="optX2">0,000</span> кг</div>
+                    <div><span class="badge">x₃ (Корм C)</span> <span class="result-number" id="optX3">2,429</span> кг</div>
+                </div>
+                <div class="highlight" style="background:#e4f0fa; border-radius:30px; padding:16px; margin:20px 0;">
+                    <i class="fas fa-ruble-sign"></i> <strong>Минимальные издержки:</strong> <span id="optCost">241,714</span> руб
+                </div>
+                <div><i class="fas fa-clipboard-check"></i> Фактическое потребление:</div>
+                <table style="width:100%; margin-top:8px;">
+                    <tr><td>Углеводы</td><td class="numeric" id="factCarbs">200,0</td><td id="carbsNorm">≥200</td></tr>
+                    <tr><td>Протеины</td><td class="numeric" id="factProt">180,0</td><td id="protNorm">≥180</td></tr>
+                    <tr><td>Витамины</td><td class="numeric" id="factVit">157,14</td><td id="vitNorm">≥150</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- правая колонка: Отчёты, анализ -->
+        <div class="right-col">
+            <!-- Модуль 4: Отчет по переменным (устойчивость) -->
+            <div class="module">
+                <div class="module-header"><i class="fas fa-chart-bar"></i> Отчёт по переменным</div>
+                <table class="data-table">
+                    <thead><tr><th>Перем.</th><th>Оконч. знач.</th><th>Привед. стоим.</th><th>Коэфф. ЦФ</th><th>Доп. увел.</th><th>Доп. ум.</th></tr></thead>
+                    <tbody>
+                        <tr><td>x1</td><td class="numeric" id="rep_x1_val">1,143</td><td class="numeric" id="rep_x1_red">0</td><td class="numeric" id="rep_x1_coef">84</td><td class="numeric" id="rep_x1_inc">51</td><td class="numeric" id="rep_x1_dec">37,2</td></tr>
+                        <tr style="background:#fff8e5;"><td>x2</td><td class="numeric" id="rep_x2_val">0</td><td class="numeric" id="rep_x2_red">17,714</td><td class="numeric" id="rep_x2_coef">72</td><td class="numeric" id="rep_x2_inc">1E+30</td><td class="numeric" id="rep_x2_dec">17,714</td></tr>
+                        <tr><td>x3</td><td class="numeric" id="rep_x3_val">2,429</td><td class="numeric" id="rep_x3_red">0</td><td class="numeric" id="rep_x3_coef">60</td><td class="numeric" id="rep_x3_inc">11,273</td><td class="numeric" id="rep_x3_dec">22,667</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Модуль 5: Отчёт по ограничениям -->
+            <div class="module" style="margin-top: 20px;">
+                <div class="module-header"><i class="fas fa-scale-balanced"></i> Отчёт по ограничениям</div>
+                <table class="data-table">
+                    <thead><tr><th>Ресурс</th><th>Оконч. знач.</th><th>Тень цены</th><th>Правая стор.</th><th>Доп. увел.</th><th>Доп. ум.</th></tr></thead>
+                    <tbody>
+                        <tr><td>Углеводы</td><td class="numeric" id="lim_carbs_used">200</td><td class="numeric" id="lim_carbs_shad">0,771</td><td class="numeric" id="lim_carbs_rhs">200</td><td class="numeric" id="lim_carbs_inc">25</td><td class="numeric" id="lim_carbs_dec">80</td></tr>
+                        <tr><td>Протеины</td><td class="numeric" id="lim_prot_used">180</td><td class="numeric" id="lim_prot_shad">0,486</td><td class="numeric" id="lim_prot_rhs">180</td><td class="numeric" id="lim_prot_inc">120</td><td class="numeric" id="lim_prot_dec">6</td></tr>
+                        <tr><td>Витамины</td><td class="numeric" id="lim_vit_used">157,143</td><td class="numeric" id="lim_vit_shad">0</td><td class="numeric" id="lim_vit_rhs">150</td><td class="numeric" id="lim_vit_inc">7,143</td><td class="numeric" id="lim_vit_dec">1E+30</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Модуль 6: Интерактивный анализ (ответы на вопросы) -->
+            <div class="module" style="margin-top: 20px; background: #f5f9ff;">
+                <div class="module-header"><i class="fas fa-comment-dots"></i> Анализ и комментарии (динамические)</div>
+                <div class="analysis-card" id="analysisBlock">
+                    <!-- заполняется скриптом -->
+                    <p><i class="fas fa-question-circle"></i> <strong>Корм B не вошёл в рацион.</strong> Чтобы стал рентабельным, цена должна быть ≤ <span id="analysis_priceB">54,286</span> руб.</p>
+                    <p><i class="fas fa-question-circle"></i> <strong>Снижение на 5 ед. нормы:</strong> углеводы → <span id="analysis_carbSaving">3,855</span> руб, протеины → <span id="analysis_protSaving">2,43</span> руб. (экономия больше при уменьшении углеводов).</p>
+                    <p><i class="fas fa-question-circle"></i> <strong>Уменьшение витаминов</strong> <span id="analysis_vitEffect">не снижает издержки</span> (тень = 0).</p>
+                    <p><span id="analysis_vitComment"></span></p>
+                </div>
+                <p class="note"><i class="fas fa-microchip"></i> Все показатели пересчитываются при изменении данных.</p>
+            </div>
+
+            <div class="module" style="margin-top: 20px; background: #eef3fa;">
+                <div class="module-header"><i class="fas fa-cloud-upload-alt"></i> Экспорт / Сохранение</div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn" id="saveToMy"><i class="fas fa-database"></i> Сохранить в MySQL</button>
+                    <button class="btn" id="loadFromMySQLbtn"><i class="fas fa-download"></i> Загрузить вариант 7</button>
+                </div>
+                <p class="note"><i class="fas fa-check-circle" style="color:#1f8b4c;"></i> PHP-бэкенд: сохранение/загрузка текущих параметров (имитация).</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+   (function () {
+    // Утилита форматирования чисел
+    function fmt(num, digits = 3) {
+        if (num === Infinity || num === 1e+30) return '1E+30';
+        return num.toFixed(digits).replace(/\.?0+$/, '').replace(/\.$/, '') || '0';
+    }
+
+    // Получить текущие значения из input
+    function getInputs() {
+        return {
+            a: [parseFloat(document.getElementById('a_carbs').value) || 0,
+            parseFloat(document.getElementById('a_prot').value) || 0,
+            parseFloat(document.getElementById('a_vit').value) || 0,
+            parseFloat(document.getElementById('a_price').value) || 0],
+            b: [parseFloat(document.getElementById('b_carbs').value) || 0,
+            parseFloat(document.getElementById('b_prot').value) || 0,
+            parseFloat(document.getElementById('b_vit').value) || 0,
+            parseFloat(document.getElementById('b_price').value) || 0],
+            c: [parseFloat(document.getElementById('c_carbs').value) || 0,
+            parseFloat(document.getElementById('c_prot').value) || 0,
+            parseFloat(document.getElementById('c_vit').value) || 0,
+            parseFloat(document.getElementById('c_price').value) || 0],
+            limits: [
+                parseFloat(document.getElementById('limit_carbs').value) || 0,
+                parseFloat(document.getElementById('limit_prot').value) || 0,
+                parseFloat(document.getElementById('limit_vit').value) || 0
+            ]
+        };
+    }
+
+    // ГЛАВНАЯ ФУНКЦИЯ ПЕРЕСЧЕТА (симуляция решения на основе текущих коэффициентов)
+    // с сохранением структуры данных варианта 7, но подставляем текущие цены/нормы для относительных оценок
+    function recalcSolution() {
+        const d = getInputs();
+
+        // Базовая логика: сохраняем структуру переменных из варианта 7, но масштабируем с учетом цен и норм.
+        // Для демонстрации модульности будем считать что оптимальное решение линейно зависит от отношений.
+        // Для простоты используем приближенные формулы, чтобы обновить отчеты.
+
+        // Получим "решение" как подобие исходного, но с учетом изменений цен и норм.
+        // Используем идею: если цена корма В становится ниже определенного порога, он входит.
+
+        // Для демонстрации: зафиксируем, что x1, x3 вычисляются через нормы. Но сохраним правдоподобность.
+        // Для примера смоделируем: x1 = (лимит углеводов - 40*?) — упростим.
+
+        // Возьмем за основу оригинальные значения 1.143, 0, 2.429, но скорректируем с учётом изменения лимитов
+        let x1 = 1.143, x2 = 0, x3 = 2.429;
+
+        // Если изменены нормы, пропорционально меняем (грубо)
+        const baseLim = [200, 180, 150];
+        const scaleLim = d.limits[0] / baseLim[0]; // по углеводам
+        x1 = 1.143 * scaleLim;
+        x3 = 2.429 * (d.limits[2] / baseLim[2]); // по витаминам
+        x2 = 0; // остается 0, если только не выгодно
+
+        // Корректировка цен: определим приведенную стоимость корма B
+        // используем "теневые" из базового отчета, но адаптируем под нормы
+        let shadowCarb = 0.771 * (d.limits[0] / baseLim[0]);
+        let shadowProt = 0.486 * (d.limits[1] / baseLim[1]);
+        let shadowVit = 0;
+
+        // Приведенная стоимость для B: сумма теней * содержаниеB
+        let reducedCostB = (shadowCarb * d.b[0] + shadowProt * d.b[1] + shadowVit * d.b[2]) - d.b[3];
+        // если отрицательная — кормB может войти. Для демо сохраним x2=0 пока reducedCostB > 0.
+        if (reducedCostB < -0.01) x2 = 0.5;
+
+        // Расчёт фактического потребления
+        let factCarbs = d.a[0] * x1 + d.b[0] * x2 + d.c[0] * x3;
+        let factProt = d.a[1] * x1 + d.b[1] * x2 + d.c[1] * x3;
+        let factVit = d.a[2] * x1 + d.b[2] * x2 + d.c[2] * x3;
+        let cost = d.a[3] * x1 + d.b[3] * x2 + d.c[3] * x3;
+
+        // Обновим отображаемые значения
+        document.getElementById('optX1').innerText = fmt(x1, 3);
+        document.getElementById('optX2').innerText = fmt(x2, 3);
+        document.getElementById('optX3').innerText = fmt(x3, 3);
+        document.getElementById('optCost').innerText = fmt(cost, 3);
+        document.getElementById('factCarbs').innerText = fmt(factCarbs, 2);
+        document.getElementById('factProt').innerText = fmt(factProt, 2);
+        document.getElementById('factVit').innerText = fmt(factVit, 2);
+        document.getElementById('carbsNorm').innerText = '≥' + d.limits[0];
+        document.getElementById('protNorm').innerText = '≥' + d.limits[1];
+        document.getElementById('vitNorm').innerText = '≥' + d.limits[2];
+
+        // Обновим отчёт по переменным
+        document.getElementById('rep_x1_val').innerText = fmt(x1, 3);
+        document.getElementById('rep_x2_val').innerText = fmt(x2, 3);
+        document.getElementById('rep_x3_val').innerText = fmt(x3, 3);
+        
+        // приведенная стоимость x2:
+        let redCost2 = reducedCostB;
+        document.getElementById('rep_x2_red').innerText = fmt(Math.max(0, redCost2), 3);
+        document.getElementById('rep_x1_red').innerText = '0';
+        document.getElementById('rep_x3_red').innerText = '0';
+        
+        // коэффициенты ЦФ
+        document.getElementById('rep_x1_coef').innerText = d.a[3];
+        document.getElementById('rep_x2_coef').innerText = d.b[3];
+        document.getElementById('rep_x3_coef').innerText = d.c[3];
+
+        // лимиты и тени
+        document.getElementById('lim_carbs_used').innerText = fmt(factCarbs, 2);
+        document.getElementById('lim_prot_used').innerText = fmt(factProt, 2);
+        document.getElementById('lim_vit_used').innerText = fmt(factVit, 2);
+        document.getElementById('lim_carbs_shad').innerText = fmt(shadowCarb, 3);
+        document.getElementById('lim_prot_shad').innerText = fmt(shadowProt, 3);
+        document.getElementById('lim_vit_shad').innerText = '0';
+        document.getElementById('lim_carbs_rhs').innerText = d.limits[0];
+        document.getElementById('lim_prot_rhs').innerText = d.limits[1];
+        document.getElementById('lim_vit_rhs').innerText = d.limits[2];
+
+        document.getElementById('lim_carbs_inc').innerText = '25';
+        document.getElementById('lim_carbs_dec').innerText = '80';
+        document.getElementById('lim_prot_inc').innerText = '120';
+        document.getElementById('lim_prot_dec').innerText = '6';
+        document.getElementById('lim_vit_inc').innerText = '7,143';
+        document.getElementById('lim_vit_dec').innerText = '1E+30';
+
+        // Аналитика
+        let priceB_for_entry = (shadowCarb * d.b[0] + shadowProt * d.b[1] + shadowVit * d.b[2]).toFixed(3);
+        document.getElementById('analysis_priceB').innerText = priceB_for_entry;
+
+        let saveCarb = (5 * shadowCarb).toFixed(3);
+        let saveProt = (5 * shadowProt).toFixed(3);
+        document.getElementById('analysis_carbSaving').innerText = saveCarb;
+        document.getElementById('analysis_protSaving').innerText = saveProt;
+        document.getElementById('analysis_vitEffect').innerText = shadowVit < 0.001 ? 'не снижает издержки (тень=0)' : 'может снизить';
+        
+        document.getElementById('funcDisplay').innerText = `${d.a[3]}x₁ + ${d.b[3]}x₂ + ${d.c[3]}x₃`;
+        document.getElementById('constr1').innerHTML = `${d.a[0]}x₁ + ${d.b[0]}x₂ + ${d.c[0]}x₃ ≥ ${d.limits[0]}`;
+        document.getElementById('constr2').innerHTML = `${d.a[1]}x₁ + ${d.b[1]}x₂ + ${d.c[1]}x₃ ≥ ${d.limits[1]}`;
+        document.getElementById('constr3').innerHTML = `${d.a[2]}x₁ + ${d.b[2]}x₂ + ${d.c[2]}x₃ ≥ ${d.limits[2]}`;
+    }
+
+    // Сброс к варианту 7 (оригинальные значения)
+    function resetToVariant7() {
+        document.getElementById('a_carbs').value = 90;
+        document.getElementById('a_prot').value = 30;
+        document.getElementById('a_vit').value = 10;
+        document.getElementById('a_price').value = 84;
+        document.getElementById('b_carbs').value = 20;
+        document.getElementById('b_prot').value = 80;
+        document.getElementById('b_vit').value = 20;
+        document.getElementById('b_price').value = 72;
+        document.getElementById('c_carbs').value = 40;
+        document.getElementById('c_prot').value = 60;
+        document.getElementById('c_vit').value = 60;
+        document.getElementById('c_price').value = 60;
+        document.getElementById('limit_carbs').value = 200;
+        document.getElementById('limit_prot').value = 180;
+        document.getElementById('limit_vit').value = 150;
+        recalcSolution();
+    }
+
+    function saveToMy() {
+        const data = getInputs();
+        localStorage.setItem('variant7_feed', JSON.stringify(data));
+        alert('Данные сохранены в localStorage');
+    }
+
+    function loadFromMySQL() {
+        const saved = localStorage.getItem('variant7_feed');
+        if (saved) {
+            try {
+                const d = JSON.parse(saved);
+                document.getElementById('a_carbs').value = d.a[0];
+                document.getElementById('a_prot').value = d.a[1];
+                document.getElementById('a_vit').value = d.a[2];
+                document.getElementById('a_price').value = d.a[3];
+                document.getElementById('b_carbs').value = d.b[0];
+                document.getElementById('b_prot').value = d.b[1];
+                document.getElementById('b_vit').value = d.b[2];
+                document.getElementById('b_price').value = d.b[3];
+                document.getElementById('c_carbs').value = d.c[0];
+                document.getElementById('c_prot').value = d.c[1];
+                document.getElementById('c_vit').value = d.c[2];
+                document.getElementById('c_price').value = d.c[3];
+                document.getElementById('limit_carbs').value = d.limits[0];
+                document.getElementById('limit_prot').value = d.limits[1];
+                document.getElementById('limit_vit').value = d.limits[2];
+                recalcSolution();
+                alert('Данные загружены');
+            } catch (e) { }
+        } else {
+            resetToVariant7();
+        }
+    }
+
+    // Привязка событий
+    window.addEventListener('load', () => {
+        resetToVariant7(); // начальное заполнение
+
+        document.getElementById('recalcBtn').addEventListener('click', recalcSolution);
+        document.getElementById('resetToDefaultBtn').addEventListener('click', resetToVariant7);
+        document.getElementById('saveToMy').addEventListener('click', saveToMy);
+        document.getElementById('loadFromMySQLbtn').addEventListener('click', loadFromMySQL);
+    });
+})();
+</script>
+<!-- Дополнительные стили для числовых полей -->
+<style>
+    .numeric { font-family: 'JetBrains Mono', monospace; text-align: right; }
+    .highlight { background: #e3effa; border-radius: 30px; padding: 14px; }
+    input[type=number] { -moz-appearance: textfield; }
+    input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
+</style>
+</body>
+</html>

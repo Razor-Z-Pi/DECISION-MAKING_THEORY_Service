@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Оптимизация рациона</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="stylesheet" href="./style/style.css">
+    </head>
+    <body>
+        <div class="app-container">
+            <div class="app-header">
+                <h1><i class="fas fa-cow"></i>Оптимизатор рациона</h1>
+                <div class="variant-badge"><i class="far fa-edit"></i> Вариант 7 - все данные изменяемы</div>
+            </div>
+
+            <div class="dashboard" id="app">
+                <!-- левая клонка: Модель и исходные -->
+                <div class="left-col">
+                    <!-- Модуль 1: Математическая модель (автоматически обновляется) -->
+                    <div class="module">
+                        <div class="module-header"><i class="fas fa-square-root-alt"></i> Математическая модель</div>
+                        <div class="shadow-inner" id="modelDisplay">
+                            <!-- Заполняется динамически через js -->
+                            <p><strong>Переменные:</strong> <span id="varNames">x₁ (A), x₂ (B), x₃ (C)</span></p>
+                            <p><strong>Целевая функция:</strong> min Z = <span id="funcDisplay">84x₁ + 72x₂ + 60x₃</span></p>
+                            <p><strong>Ограничения:</strong></p>
+                            <ul id="constraintsList" style="list-style: none; padding-left: 4px;">
+                                <li><i class="fas fa-arrow-right" style="color:#2a6f97; margin-right:8px;"></i><span id="constr1">90x₁ + 20x₂ + 40x₃ ≥ 200</span></li>
+                                <li><i class="fas fa-arrow-right" style="color:#2a6f97; margin-right:8px;"></i><span id="constr2">30x₁ + 80x₂ + 60x₃ ≥ 180</span></li>
+                                <li><i class="fas fa-arrow-right" style="color:#2a6f97; margin-right:8px;"></i><span id="constr3">10x₁ + 20x₂ + 60x₃ ≥ 150</span></li>
+                            </ul>
+                        </div>
+                        <p class="note"><i class="far fa-lightbulb"></i> Коэффициенты берутся из таблиц ниже.</p>
+                    </div>
+
+                    <!-- Модуль 2: Редактор кормов и норм -->
+                    <div class="module" style="margin-top: 20px;">
+                        <div class="module-header"><i class="fas fa-database"></i> Исходные данные (редактируемые)</div>
+                        <table class="data-table">
+                            <thead><tr><th>Корм</th><th>Углеводы</th><th>Протеины</th><th>Витамины</th><th>Цена</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Корм A</td>
+                                    <td><input type="number" id="a_carbs" value="90" step="any"></td>
+                                    <td><input type="number" id="a_prot" value="30" step="any"></td>
+                                    <td><input type="number" id="a_vit" value="10" step="any"></td>
+                                    <td><input type="number" id="a_price" value="84" step="any"></td>
+                                </tr>
+                                <tr>
+                                    <td>Корм B</td>
+                                    <td><input type="number" id="b_carbs" value="20" step="any"></td>
+                                    <td><input type="number" id="b_prot" value="80" step="any"></td>
+                                    <td><input type="number" id="b_vit" value="20" step="any"></td>
+                                    <td><input type="number" id="b_price" value="72" step="any"></td>
+                                </tr>
+                                <tr>
+                                    <td>Корм C</td>
+                                    <td><input type="number" id="c_carbs" value="40" step="any"></td>
+                                    <td><input type="number" id="c_prot" value="60" step="any"></td>
+                                    <td><input type="number" id="c_vit" value="60" step="any"></td>
+                                    <td><input type="number" id="c_price" value="60" step="any"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div style="margin-top: 20px; background: #f4f9fe; padding: 16px; border-radius: 20px;">
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                                <span><strong>Минимальные нормы:</strong></span>
+                                <label>Углеводы <input type="number" id="limit_carbs" value="200" step="any" style="width:90px; padding:6px; border-radius:20px; border:1px solid #bdd1e8;"></label>
+                                <label>Протеины <input type="number" id="limit_prot" value="180" step="any" style="width:90px; padding:6px; border-radius:20px;"></label>
+                                <label>Витамины <input type="number" id="limit_vit" value="150" step="any" style="width:90px; padding:6px; border-radius:20px;"></label>
+                            </div>
+                        </div>
+
+                        <!-- Кнопка пересчета -->
+                        <div style="margin-top: 24px; display: flex; gap: 16px;">
+                            <button class="btn btn-primary" id="recalcBtn"><i class="fas fa-sync-alt"></i> Пересчитать решение (симуляция)</button>
+                            <button class="btn" id="resetToDefaultBtn"><i class="fas fa-undo-alt"></i> Сброс к варианту 7</button>
+                        </div>
+                        <p class="note"><i class="fas fa-info-circle"></i> После изменения нажмите "Пересчитать" — обновятся рацион, отчёты и комментарии!!!</p>
+                    </div>
+
+                    <!-- Модуль 3: Оптимальный рацион (решение) -->
+                    <div class="module" style="margin-top: 20px;">
+                        <div class="module-header"><i class="fas fa-trophy"></i> Оптимальный рацион</div>
+                        <div class="flex-between">
+                            <div><span class="badge">x₁ (Корм A)</span> <span class="result-number" id="optX1">1,143</span> кг</div>
+                            <div><span class="badge">x₂ (Корм B)</span> <span class="result-number" id="optX2">0,000</span> кг</div>
+                            <div><span class="badge">x₃ (Корм C)</span> <span class="result-number" id="optX3">2,429</span> кг</div>
+                        </div>
+                        <div class="highlight" style="background:#e4f0fa; border-radius:30px; padding:16px; margin:20px 0;">
+                            <i class="fas fa-ruble-sign"></i> <strong>Минимальные издержки:</strong> <span id="optCost">241,714</span> руб
+                        </div>
+                        <div><i class="fas fa-clipboard-check"></i> Фактическое потребление:</div>
+                        <table style="width:100%; margin-top:8px;">
+                            <tr><td>Углеводы</td><td class="numeric" id="factCarbs">200,0</td><td id="carbsNorm">≥200</td></tr>
+                            <tr><td>Протеины</td><td class="numeric" id="factProt">180,0</td><td id="protNorm">≥180</td></tr>
+                            <tr><td>Витамины</td><td class="numeric" id="factVit">157,14</td><td id="vitNorm">≥150</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- правая колонка: Отчёты, анализ -->
+                <div class="right-col">
+                    <!-- Модуль 4: Отчет по переменным (устойчивость) -->
+                    <div class="module">
+                        <div class="module-header"><i class="fas fa-chart-bar"></i> Отчёт по переменным</div>
+                        <table class="data-table">
+                            <thead><tr><th>Перем.</th><th>Оконч. знач.</th><th>Привед. стоим.</th><th>Коэфф. ЦФ</th><th>Доп. увел.</th><th>Доп. ум.</th></tr></thead>
+                            <tbody>
+                                <tr><td>x1</td><td class="numeric" id="rep_x1_val">1,143</td><td class="numeric" id="rep_x1_red">0</td><td class="numeric" id="rep_x1_coef">84</td><td class="numeric" id="rep_x1_inc">51</td><td class="numeric" id="rep_x1_dec">37,2</td></tr>
+                                <tr style="background:#fff8e5;"><td>x2</td><td class="numeric" id="rep_x2_val">0</td><td class="numeric" id="rep_x2_red">17,714</td><td class="numeric" id="rep_x2_coef">72</td><td class="numeric" id="rep_x2_inc">1E+30</td><td class="numeric" id="rep_x2_dec">17,714</td></tr>
+                                <tr><td>x3</td><td class="numeric" id="rep_x3_val">2,429</td><td class="numeric" id="rep_x3_red">0</td><td class="numeric" id="rep_x3_coef">60</td><td class="numeric" id="rep_x3_inc">11,273</td><td class="numeric" id="rep_x3_dec">22,667</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Модуль 5: Отчёт по ограничениям -->
+                    <div class="module" style="margin-top: 20px;">
+                        <div class="module-header"><i class="fas fa-scale-balanced"></i> Отчёт по ограничениям</div>
+                        <table class="data-table">
+                            <thead><tr><th>Ресурс</th><th>Оконч. знач.</th><th>Тень цены</th><th>Правая стор.</th><th>Доп. увел.</th><th>Доп. ум.</th></tr></thead>
+                            <tbody>
+                                <tr><td>Углеводы</td><td class="numeric" id="lim_carbs_used">200</td><td class="numeric" id="lim_carbs_shad">0,771</td><td class="numeric" id="lim_carbs_rhs">200</td><td class="numeric" id="lim_carbs_inc">25</td><td class="numeric" id="lim_carbs_dec">80</td></tr>
+                                <tr><td>Протеины</td><td class="numeric" id="lim_prot_used">180</td><td class="numeric" id="lim_prot_shad">0,486</td><td class="numeric" id="lim_prot_rhs">180</td><td class="numeric" id="lim_prot_inc">120</td><td class="numeric" id="lim_prot_dec">6</td></tr>
+                                <tr><td>Витамины</td><td class="numeric" id="lim_vit_used">157,143</td><td class="numeric" id="lim_vit_shad">0</td><td class="numeric" id="lim_vit_rhs">150</td><td class="numeric" id="lim_vit_inc">7,143</td><td class="numeric" id="lim_vit_dec">1E+30</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Модуль 6: Интерактивный анализ (ответы на вопросы) -->
+                    <div class="module" style="margin-top: 20px; background: #f5f9ff;">
+                        <div class="module-header"><i class="fas fa-comment-dots"></i> Анализ и комментарии (динамические)</div>
+                        <div class="analysis-card" id="analysisBlock">
+                            <!-- заполняется скриптом -->
+                            <p><i class="fas fa-question-circle"></i> <strong>Корм B не вошёл в рацион.</strong> Чтобы стал рентабельным, цена должна быть ≤ <span id="analysis_priceB">54,286</span> руб.</p>
+                            <p><i class="fas fa-question-circle"></i> <strong>Снижение на 5 ед. нормы:</strong> углеводы → <span id="analysis_carbSaving">3,855</span> руб, протеины → <span id="analysis_protSaving">2,43</span> руб. (экономия больше при уменьшении углеводов).</p>
+                            <p><i class="fas fa-question-circle"></i> <strong>Уменьшение витаминов</strong> <span id="analysis_vitEffect">не снижает издержки</span> (тень = 0).</p>
+                            <p><span id="analysis_vitComment"></span></p>
+                        </div>
+                        <p class="note"><i class="fas fa-microchip"></i> Все показатели пересчитываются при изменении данных.</p>
+                    </div>
+
+                    <div class="module" style="margin-top: 20px; background: #eef3fa;">
+                        <div class="module-header"><i class="fas fa-cloud-upload-alt"></i> Экспорт / Сохранение</div>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="btn" id="saveToMy"><i class="fas fa-database"></i> Сохранить</button>
+                            <button class="btn" id="loadFromMySQLbtn"><i class="fas fa-download"></i> Загрузить вариант 7</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="./script/app.js"></script>
+    </body>
+</html>
