@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оптимизация рациона</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./style/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <h1><i class="fas fa-cow"></i> Оптимизатор рациона</h1>
+            <div class="variant-badge"><i class="far fa-edit"></i> Вариант 7</div>
+        </div>
+
+        <div class="dashboard" id="app">
+            <!-- Левая колонка: Данные и графики -->
+            <div class="left-col">
+                <!-- Модуль: Редактор данных -->
+                <div class="module">
+                    <div class="module-header"><i class="fas fa-sliders-h"></i> Параметры модели (редактируемые)</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Корм</th>
+                                <th>Углеводы</th>
+                                <th>Протеины</th>
+                                <th>Витамины</th>
+                                <th>Цена</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Корм A</td>
+                                <td><input type="number" id="a_carbs" value="90" step="0.1"></td>
+                                <td><input type="number" id="a_prot" value="30" step="0.1"></td>
+                                <td><input type="number" id="a_vit" value="10" step="0.1"></td>
+                                <td><input type="number" id="a_price" value="84" step="0.1"></td>
+                            </tr>
+                            <tr>
+                                <td>Корм B</td>
+                                <td><input type="number" id="b_carbs" value="20" step="0.1"></td>
+                                <td><input type="number" id="b_prot" value="80" step="0.1"></td>
+                                <td><input type="number" id="b_vit" value="20" step="0.1"></td>
+                                <td><input type="number" id="b_price" value="72" step="0.1"></td>
+                            </tr>
+                            <tr>
+                                <td>Корм C</td>
+                                <td><input type="number" id="c_carbs" value="40" step="0.1"></td>
+                                <td><input type="number" id="c_prot" value="60" step="0.1"></td>
+                                <td><input type="number" id="c_vit" value="60" step="0.1"></td>
+                                <td><input type="number" id="c_price" value="60" step="0.1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin: 20px 0; display: flex; gap: 20px; flex-wrap: wrap;">
+                        <label>Норма углеводов: <input type="number" id="limit_carbs" value="200" step="0.1" style="width:100px; padding:8px; border-radius:20px; border:1px solid #bdd1e8;"></label>
+                        <label>Норма протеинов: <input type="number" id="limit_prot" value="180" step="0.1" style="width:100px; padding:8px; border-radius:20px;"></label>
+                        <label>Норма витаминов: <input type="number" id="limit_vit" value="150" step="0.1" style="width:100px; padding:8px; border-radius:20px;"></label>
+                    </div>
+
+                    <div class="flex-between">
+                        <button class="btn btn-primary" id="recalcBtn"><i class="fas fa-sync-alt"></i> Пересчитать</button>
+                        <button class="btn" id="resetToDefaultBtn"><i class="fas fa-undo-alt"></i> Сброс к варианту 7</button>
+                    </div>
+                </div>
+
+                <!-- Модуль: Графики -->
+                <div class="module">
+                    <div class="module-header"><i class="fas fa-chart-pie"></i> Визуализация и аналитика</div>
+
+                    <!-- Ключевые метрики -->
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="label">Общая стоимость</div>
+                            <div class="value" id="metricCost">241.71</div>
+                            <div class="trend"><i class="fas fa-arrow-down" style="color:#2e7d32;"></i> мин.</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="label">Кормов в рационе</div>
+                            <div class="value" id="metricFeedCount">2</div>
+                            <div class="trend">A и C</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="label">Дефицит/избыток</div>
+                            <div class="value" id="metricDeficit">+7.14</div>
+                            <div class="trend">по витаминам</div>
+                        </div>
+                    </div>
+
+                    <!-- Сетка графиков -->
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <div class="chart-title"><i class="fas fa-chart-pie" style="color:#e67e22;"></i> Структура рациона (кг)</div>
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-title"><i class="fas fa-chart-bar" style="color:#2980b9;"></i> Питательные вещества</div>
+                            <canvas id="barChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-title"><i class="fas fa-chart-line" style="color:#27ae60;"></i> Чувствительность (тени)</div>
+                            <canvas id="sensitivityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительная визуализация: распределение стоимости -->
+                    <div style="margin-top: 20px;">
+                        <div class="chart-title"><i class="fas fa-coins"></i> Доля в общих издержках</div>
+                        <div style="height: 40px; background: #edf2f7; border-radius: 30px; overflow: hidden; display: flex;" id="costDistribution">
+                            <div style="background: #3498db; width: 0%;" id="costADist">0%</div>
+                            <div style="background: #e67e22; width: 0%;" id="costBDist">0%</div>
+                            <div style="background: #2ecc71; width: 0%;" id="costCDist">0%</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem;">
+                            <span><span style="color:#3498db;">●</span> Корм A: <span id="costAPct">0%</span></span>
+                            <span><span style="color:#e67e22;">●</span> Корм B: <span id="costBPct">0%</span></span>
+                            <span><span style="color:#2ecc71;">●</span> Корм C: <span id="costCPct">0%</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка: Отчеты и аналитика -->
+            <div class="right-col">
+                <!-- Модуль: Оптимальный рацион -->
+                <div class="module">
+                    <div class="module-header"><i class="fas fa-check-circle"></i> Оптимальное решение</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div style="background: #e8f0fe; border-radius: 20px; padding: 16px;">
+                            <div style="font-size: 0.9rem; color:#4a6382;">x₁ (Корм A)</div>
+                            <div style="font-size: 2.2rem; font-weight:700; color:#0b2b4a;" id="optX1">1.143</div>
+                            <div style="font-size:0.85rem;">кг</div>
+                        </div>
+                        <div style="background: #e8f0fe; border-radius: 20px; padding: 16px;">
+                            <div style="font-size: 0.9rem; color:#4a6382;">x₂ (Корм B)</div>
+                            <div style="font-size: 2.2rem; font-weight:700; color:#0b2b4a;" id="optX2">0.000</div>
+                            <div style="font-size:0.85rem;">кг</div>
+                        </div>
+                        <div style="background: #e8f0fe; border-radius: 20px; padding: 16px; grid-column: span 2;">
+                            <div style="font-size: 0.9rem; color:#4a6382;">x₃ (Корм C)</div>
+                            <div style="font-size: 2.2rem; font-weight:700; color:#0b2b4a;" id="optX3">2.429</div>
+                            <div style="font-size:0.85rem;">кг</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Модуль: Отчет по ограничениям -->
+                <div class="module">
+                    <div class="module-header"><i class="fas fa-balance-scale"></i> Использование ресурсов</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ресурс</th>
+                                <th>Факт</th>
+                                <th>Норма</th>
+                                <th>Тень</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Углеводы</td>
+                                <td id="factCarbs" class="numeric">200.0</td>
+                                <td id="normCarbs" class="numeric">200</td>
+                                <td id="shadowCarbs" class="numeric">0.771</td>
+                                <td><span class="insight-badge" id="statusCarbs">✓ лимит</span></td>
+                            </tr>
+                            <tr>
+                                <td>Протеины</td>
+                                <td id="factProt" class="numeric">180.0</td>
+                                <td id="normProt" class="numeric">180</td>
+                                <td id="shadowProt" class="numeric">0.486</td>
+                                <td><span class="insight-badge" id="statusProt">✓ лимит</span></td>
+                            </tr>
+                            <tr>
+                                <td>Витамины</td>
+                                <td id="factVit" class="numeric">157.14</td>
+                                <td id="normVit" class="numeric">150</td>
+                                <td id="shadowVit" class="numeric">0.000</td>
+                                <td><span class="insight-badge" id="statusVit">⤴ избыток</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Модуль: Глубокая аналитика -->
+                <div class="module">
+                    <div class="module-header"><i class="fas fa-microscope"></i> Анализ чувствительности</div>
+
+                    <div style="background: #f4f9ff; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <div style="font-weight:600; margin-bottom:16px;">📊 Эффект от изменения норм (-5 ед.)</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <div style="color:#4a6382;">Углеводы -5</div>
+                                <div style="font-size:1.5rem; font-weight:700; color:#0b2b4a;" id="savingCarb">3.86</div>
+                                <div style="color:#2e7d32;">↓ руб</div>
+                            </div>
+                            <div>
+                                <div style="color:#4a6382;">Протеины -5</div>
+                                <div style="font-size:1.5rem; font-weight:700; color:#0b2b4a;" id="savingProt">2.43</div>
+                                <div style="color:#2e7d32;">↓ руб</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: #fff4e5; border-radius: 20px; padding: 20px;">
+                        <div style="font-weight:600; margin-bottom:12px;">💰 Цена входа для корма B</div>
+                        <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+                            <span style="font-size:2rem; font-weight:700; color:#c45d00;" id="priceBEntry">54.29</span>
+                            <span style="color:#4a6382;">руб/кг и ниже</span>
+                        </div>
+                        <div style="margin-top:12px; font-size:0.95rem;">
+                            Текущая цена B: <span id="currentPriceB">72</span> руб. 
+                            <span id="priceBDiff" style="color:#c0392b;">(дороже на 17.71 руб.)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Модуль: Экспорт -->
+                <div class="module">
+                    <div class="module-header"><i class="fas fa-database"></i> Сохранение</div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn" id="saveToLocalBtn"><i class="fas fa-save"></i> Сохранить</button>
+                        <button class="btn" id="loadFromLocalBtn"><i class="fas fa-download"></i> Загрузить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./script/app.js"></script>
+</body>
+</html>
