@@ -230,6 +230,79 @@ body {
     border: 1px solid #dee9f2;
 }
 
+/* Графики */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin: 20px 0;
+}
+
+.chart-container {
+    background: #fafcff;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid #e2eaf2;
+    height: 300px;
+    position: relative;
+}
+
+.chart-container canvas {
+    max-height: 260px;
+    width: 100% !important;
+}
+
+.chart-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #1f3a5f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Аналитические карточки */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.analytics-card {
+    background: linear-gradient(145deg, #f8fcff, #f0f7ff);
+    border-radius: 20px;
+    padding: 18px;
+    border: 1px solid #cddff2;
+}
+
+.analytics-card .label {
+    font-size: 0.9rem;
+    color: #4a6382;
+    margin-bottom: 8px;
+}
+
+.analytics-card .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0b2b4a;
+}
+
+.analytics-card .trend {
+    font-size: 0.9rem;
+    color: #2e7d32;
+    margin-top: 6px;
+}
+
+.insight-badge {
+    background: #e8f0fe;
+    border-radius: 30px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin: 4px 0;
+}
+
 @media (max-width: 700px) {
     .dual-column {
         grid-template-columns: 1fr;
@@ -258,4 +331,139 @@ input[type=number] {
 
 input[type=number]::-webkit-inner-spin-button {
     opacity: 0.5;
+}
+
+/* Дополнительные стили для графиков и анимаций */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin: 20px 0;
+}
+
+.chart-container {
+    background: #fafcff;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid #e2eaf2;
+    height: 300px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.chart-container:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.chart-container canvas {
+    max-height: 260px;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.chart-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #1f3a5f;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Анимации для карточек */
+.analytics-card, .module {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.analytics-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 32px rgba(0,30,60,0.15);
+}
+
+/* Анимированная полоса распределения */
+#costDistribution div {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Анимация для чисел */
+@keyframes countUp {
+    from {
+        opacity: 0.5;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.value {
+    animation: countUp 0.5s ease-out;
+}
+
+/* Стили для инсайтов */
+.insight-badge {
+    background: #e8f0fe;
+    border-radius: 30px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin: 4px 0;
+    transition: all 0.2s ease;
+}
+
+.insight-badge:hover {
+    background: #d4e4fc;
+    transform: scale(1.05);
+}
+
+/* Адаптивность для графиков */
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}
+
+/* Стили для тултипов графиков */
+.chartjs-tooltip {
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    pointer-events: none;
+    transition: all 0.1s ease;
+}
+
+/* Индикаторы загрузки */
+.btn i {
+    transition: transform 0.3s ease;
+}
+
+.btn:hover i {
+    transform: rotate(180deg);
+}
+
+/* Анимация для обновления данных */
+.updating {
+    animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1); }
 }

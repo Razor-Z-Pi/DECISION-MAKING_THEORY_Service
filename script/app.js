@@ -1,165 +1,355 @@
 (function () {
-    // Утилита форматирования чисел
+    let pieChart, barChart, sensitivityChart;
+
+    // Утилита форматирования чисел с учетом десятичных разделителей
+    function parseNumber(value) {
+        if (typeof value === 'string') {
+            value = value.replace(',', '.');
+        }
+        return parseFloat(value) || 0;
+    }
+
     function fmt(num, digits = 3) {
-        if (num === Infinity || num === 1e+30) return '1E+30';
+        if (num === Infinity || num === 1e+30) return '∞';
+        if (isNaN(num) || num === null || num === undefined) return '0';
         return num.toFixed(digits).replace(/\.?0+$/, '').replace(/\.$/, '') || '0';
     }
 
-    // Получить текущие значения из input
     function getInputs() {
         return {
-            a: [parseFloat(document.getElementById('a_carbs').value) || 0,
-            parseFloat(document.getElementById('a_prot').value) || 0,
-            parseFloat(document.getElementById('a_vit').value) || 0,
-            parseFloat(document.getElementById('a_price').value) || 0],
-            b: [parseFloat(document.getElementById('b_carbs').value) || 0,
-            parseFloat(document.getElementById('b_prot').value) || 0,
-            parseFloat(document.getElementById('b_vit').value) || 0,
-            parseFloat(document.getElementById('b_price').value) || 0],
-            c: [parseFloat(document.getElementById('c_carbs').value) || 0,
-            parseFloat(document.getElementById('c_prot').value) || 0,
-            parseFloat(document.getElementById('c_vit').value) || 0,
-            parseFloat(document.getElementById('c_price').value) || 0],
+            a: [
+                parseNumber(document.getElementById('a_carbs')?.value || 0),
+                parseNumber(document.getElementById('a_prot')?.value || 0),
+                parseNumber(document.getElementById('a_vit')?.value || 0),
+                parseNumber(document.getElementById('a_price')?.value || 0)
+            ],
+            b: [
+                parseNumber(document.getElementById('b_carbs')?.value || 0),
+                parseNumber(document.getElementById('b_prot')?.value || 0),
+                parseNumber(document.getElementById('b_vit')?.value || 0),
+                parseNumber(document.getElementById('b_price')?.value || 0)
+            ],
+            c: [
+                parseNumber(document.getElementById('c_carbs')?.value || 0),
+                parseNumber(document.getElementById('c_prot')?.value || 0),
+                parseNumber(document.getElementById('c_vit')?.value || 0),
+                parseNumber(document.getElementById('c_price')?.value || 0)
+            ],
             limits: [
-                parseFloat(document.getElementById('limit_carbs').value) || 0,
-                parseFloat(document.getElementById('limit_prot').value) || 0,
-                parseFloat(document.getElementById('limit_vit').value) || 0
+                parseNumber(document.getElementById('limit_carbs')?.value || 0),
+                parseNumber(document.getElementById('limit_prot')?.value || 0),
+                parseNumber(document.getElementById('limit_vit')?.value || 0)
             ]
         };
     }
 
-    // ГЛАВНАЯ ФУНКЦИЯ ПЕРЕСЧЕТА (симуляция решения на основе текущих коэффициентов)
-    // с сохранением структуры данных варианта 7, но подставляем текущие цены/нормы для относительных оценок
+    // Обновление графиков
+    function updateCharts(x1, x2, x3, factCarbs, factProt, factVit, limits, shCarb, shProt, shVit) {
+        const totalKg = x1 + x2 + x3;
+
+        // Круговая диаграмма
+        if (pieChart) {
+            pieChart.data.datasets[0].data = [x1, x2, x3];
+            pieChart.update();
+        } else {
+            const pieCtx = document.getElementById('pieChart')?.getContext('2d');
+            if (pieCtx) {
+                pieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Корм A', 'Корм B', 'Корм C'],
+                        datasets: [{
+                            data: [x1, x2, x3],
+                            backgroundColor: ['#3498db', '#e67e22', '#2ecc71'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const value = context.raw;
+                                        const percentage = totalKg > 0 ? ((value / totalKg) * 100).toFixed(1) : 0;
+                                        return `${context.label}: ${value.toFixed(3)} кг (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Столбчатая диаграмма
+        if (barChart) {
+            barChart.data.datasets[0].data = [factCarbs, factProt, factVit];
+            barChart.data.datasets[1].data = limits;
+            barChart.update();
+        } else {
+            const barCtx = document.getElementById('barChart')?.getContext('2d');
+            if (barCtx) {
+                barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Углеводы', 'Протеины', 'Витамины'],
+                        datasets: [
+                            {
+                                label: 'Факт',
+                                data: [factCarbs, factProt, factVit],
+                                backgroundColor: '#2c6b9e',
+                                borderRadius: 8
+                            },
+                            {
+                                label: 'Норма',
+                                data: limits,
+                                backgroundColor: '#e67e22',
+                                borderRadius: 8,
+                                type: 'line',
+                                borderColor: '#e67e22',
+                                borderWidth: 3,
+                                fill: false,
+                                pointStyle: 'circle'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Диаграмма чувствительности
+        if (sensitivityChart) {
+            sensitivityChart.data.datasets[0].data = [shCarb, shProt, shVit];
+            sensitivityChart.update();
+        } else {
+            const sensCtx = document.getElementById('sensitivityChart')?.getContext('2d');
+            if (sensCtx) {
+                sensitivityChart = new Chart(sensCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Углеводы', 'Протеины', 'Витамины'],
+                        datasets: [{
+                            label: 'Теневая цена (руб/ед)',
+                            data: [shCarb, shProt, shVit],
+                            backgroundColor: function (context) {
+                                const value = context.raw;
+                                return value > 0 ? '#3498db' : '#95a5a6';
+                            },
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+    }
+
     function recalcSolution() {
+        console.log('Пересчет начат');
         const d = getInputs();
+        console.log('Входные данные:', d);
 
-        // Базовая логика: сохраняем структуру переменных из варианта 7, но масштабируем с учетом цен и норм.
-        // Для демонстрации модульности будем считать что оптимальное решение линейно зависит от отношений.
-        // Для простоты используем приближенные формулы, чтобы обновить отчеты.
+        // Проверка на корректность данных
+        if (d.limits.some(v => isNaN(v) || v <= 0)) {
+            alert('Пожалуйста, введите корректные положительные значения норм');
+            return;
+        }
 
-        // Получим "решение" как подобие исходного, но с учетом изменений цен и норм.
-        // Используем идею: если цена корма В становится ниже определенного порога, он входит.
-
-        // Для демонстрации: зафиксируем, что x1, x3 вычисляются через нормы. Но сохраним правдоподобность.
-        // Для примера смоделируем: x1 = (лимит углеводов - 40*?) — упростим.
-
-        // Возьмем за основу оригинальные значения 1.143, 0, 2.429, но скорректируем с учётом изменения лимитов
+        // Для простоты используем приближенное решение на основе исходных данных
+        // В реальном проекте здесь должен быть симплекс-метод
         let x1 = 1.143, x2 = 0, x3 = 2.429;
 
-        // Если изменены нормы, пропорционально меняем (грубо)
+        // Корректировка на основе норм
         const baseLim = [200, 180, 150];
-        const scaleLim = d.limits[0] / baseLim[0]; // по углеводам
-        x1 = 1.143 * scaleLim;
-        x3 = 2.429 * (d.limits[2] / baseLim[2]); // по витаминам
-        x2 = 0; // остается 0, если только не выгодно
+        if (d.limits[0] > 0) x1 = 1.143 * (d.limits[0] / baseLim[0]);
+        if (d.limits[2] > 0) x3 = 2.429 * (d.limits[2] / baseLim[2]);
 
-        // Корректировка цен: определим приведенную стоимость корма B
-        // используем "теневые" из базового отчета, но адаптируем под нормы
+        // Теневые цены
         let shadowCarb = 0.771 * (d.limits[0] / baseLim[0]);
         let shadowProt = 0.486 * (d.limits[1] / baseLim[1]);
         let shadowVit = 0;
 
-        // Приведенная стоимость для B: сумма теней * содержаниеB
-        let reducedCostB = (shadowCarb * d.b[0] + shadowProt * d.b[1] + shadowVit * d.b[2]) - d.b[3];
-        // если отрицательная — кормB может войти. Для демо сохраним x2=0 пока reducedCostB > 0.
-        if (reducedCostB < -0.01) x2 = 0.5;
-
-        // Расчёт фактического потребления
+        // Фактическое потребление
         let factCarbs = d.a[0] * x1 + d.b[0] * x2 + d.c[0] * x3;
         let factProt = d.a[1] * x1 + d.b[1] * x2 + d.c[1] * x3;
         let factVit = d.a[2] * x1 + d.b[2] * x2 + d.c[2] * x3;
         let cost = d.a[3] * x1 + d.b[3] * x2 + d.c[3] * x3;
 
-        // Обновим отображаемые значения
-        document.getElementById('optX1').innerText = fmt(x1, 3);
-        document.getElementById('optX2').innerText = fmt(x2, 3);
-        document.getElementById('optX3').innerText = fmt(x3, 3);
-        document.getElementById('optCost').innerText = fmt(cost, 3);
-        document.getElementById('factCarbs').innerText = fmt(factCarbs, 2);
-        document.getElementById('factProt').innerText = fmt(factProt, 2);
-        document.getElementById('factVit').innerText = fmt(factVit, 2);
-        document.getElementById('carbsNorm').innerText = '≥' + d.limits[0];
-        document.getElementById('protNorm').innerText = '≥' + d.limits[1];
-        document.getElementById('vitNorm').innerText = '≥' + d.limits[2];
+        // console.log('Результаты:', { x1, x2, x3, cost, factCarbs, factProt, factVit });
 
-        // Обновим отчёт по переменным
-        document.getElementById('rep_x1_val').innerText = fmt(x1, 3);
-        document.getElementById('rep_x2_val').innerText = fmt(x2, 3);
-        document.getElementById('rep_x3_val').innerText = fmt(x3, 3);
-        
-        // приведенная стоимость x2:
-        let redCost2 = reducedCostB;
-        document.getElementById('rep_x2_red').innerText = fmt(Math.max(0, redCost2), 3);
-        document.getElementById('rep_x1_red').innerText = '0';
-        document.getElementById('rep_x3_red').innerText = '0';
-        
-        // коэффициенты ЦФ
-        document.getElementById('rep_x1_coef').innerText = d.a[3];
-        document.getElementById('rep_x2_coef').innerText = d.b[3];
-        document.getElementById('rep_x3_coef').innerText = d.c[3];
+        // Обновление элементов на странице
+        const elements = {
+            optX1: document.getElementById('optX1'),
+            optX2: document.getElementById('optX2'),
+            optX3: document.getElementById('optX3'),
+            metricCost: document.getElementById('metricCost'),
+            metricFeedCount: document.getElementById('metricFeedCount'),
+            metricDeficit: document.getElementById('metricDeficit'),
+            factCarbs: document.getElementById('factCarbs'),
+            factProt: document.getElementById('factProt'),
+            factVit: document.getElementById('factVit'),
+            normCarbs: document.getElementById('normCarbs'),
+            normProt: document.getElementById('normProt'),
+            normVit: document.getElementById('normVit'),
+            shadowCarbs: document.getElementById('shadowCarbs'),
+            shadowProt: document.getElementById('shadowProt'),
+            shadowVit: document.getElementById('shadowVit'),
+            statusCarbs: document.getElementById('statusCarbs'),
+            statusProt: document.getElementById('statusProt'),
+            statusVit: document.getElementById('statusVit'),
+            savingCarb: document.getElementById('savingCarb'),
+            savingProt: document.getElementById('savingProt'),
+            priceBEntry: document.getElementById('priceBEntry'),
+            currentPriceB: document.getElementById('currentPriceB'),
+            priceBDiff: document.getElementById('priceBDiff'),
+            costADist: document.getElementById('costADist'),
+            costBDist: document.getElementById('costBDist'),
+            costCDist: document.getElementById('costCDist'),
+            costAPct: document.getElementById('costAPct'),
+            costBPct: document.getElementById('costBPct'),
+            costCPct: document.getElementById('costCPct')
+        };
 
-        // лимиты и тени
-        document.getElementById('lim_carbs_used').innerText = fmt(factCarbs, 2);
-        document.getElementById('lim_prot_used').innerText = fmt(factProt, 2);
-        document.getElementById('lim_vit_used').innerText = fmt(factVit, 2);
-        document.getElementById('lim_carbs_shad').innerText = fmt(shadowCarb, 3);
-        document.getElementById('lim_prot_shad').innerText = fmt(shadowProt, 3);
-        document.getElementById('lim_vit_shad').innerText = '0';
-        document.getElementById('lim_carbs_rhs').innerText = d.limits[0];
-        document.getElementById('lim_prot_rhs').innerText = d.limits[1];
-        document.getElementById('lim_vit_rhs').innerText = d.limits[2];
+        // Проверяем наличие элементов
+        for (let [key, element] of Object.entries(elements)) {
+            if (!element) {
+                console.warn(`Элемент ${key} не найден в DOM`);
+            }
+        }
 
-        document.getElementById('lim_carbs_inc').innerText = '25';
-        document.getElementById('lim_carbs_dec').innerText = '80';
-        document.getElementById('lim_prot_inc').innerText = '120';
-        document.getElementById('lim_prot_dec').innerText = '6';
-        document.getElementById('lim_vit_inc').innerText = '7,143';
-        document.getElementById('lim_vit_dec').innerText = '1E+30';
+        // Обновляем значения, если элементы существуют
+        if (elements.optX1) elements.optX1.innerText = fmt(x1, 3);
+        if (elements.optX2) elements.optX2.innerText = fmt(x2, 3);
+        if (elements.optX3) elements.optX3.innerText = fmt(x3, 3);
+        if (elements.metricCost) elements.metricCost.innerText = fmt(cost, 2);
+
+        let feedCount = (x1 > 0.001 ? 1 : 0) + (x2 > 0.001 ? 1 : 0) + (x3 > 0.001 ? 1 : 0);
+        if (elements.metricFeedCount) elements.metricFeedCount.innerText = feedCount;
+
+        let deficit = factVit - d.limits[2];
+        if (elements.metricDeficit) elements.metricDeficit.innerText = (deficit > 0 ? '+' : '') + fmt(deficit, 2);
+
+        if (elements.factCarbs) elements.factCarbs.innerText = fmt(factCarbs, 2);
+        if (elements.factProt) elements.factProt.innerText = fmt(factProt, 2);
+        if (elements.factVit) elements.factVit.innerText = fmt(factVit, 2);
+        if (elements.normCarbs) elements.normCarbs.innerText = fmt(d.limits[0], 1);
+        if (elements.normProt) elements.normProt.innerText = fmt(d.limits[1], 1);
+        if (elements.normVit) elements.normVit.innerText = fmt(d.limits[2], 1);
+        if (elements.shadowCarbs) elements.shadowCarbs.innerText = fmt(shadowCarb, 3);
+        if (elements.shadowProt) elements.shadowProt.innerText = fmt(shadowProt, 3);
+        if (elements.shadowVit) elements.shadowVit.innerText = fmt(shadowVit, 3);
+
+        const eps = 0.01;
+        if (elements.statusCarbs) {
+            elements.statusCarbs.innerHTML = Math.abs(factCarbs - d.limits[0]) < eps ?
+                '<span style="color:#27ae60;">✓ лимит</span>' :
+                '<span style="color:#e67e22;">⤴ избыток</span>';
+        }
+        if (elements.statusProt) {
+            elements.statusProt.innerHTML = Math.abs(factProt - d.limits[1]) < eps ?
+                '<span style="color:#27ae60;">✓ лимит</span>' :
+                '<span style="color:#e67e22;">⤴ избыток</span>';
+        }
+        if (elements.statusVit) {
+            elements.statusVit.innerHTML = Math.abs(factVit - d.limits[2]) < eps ?
+                '<span style="color:#27ae60;">✓ лимит</span>' :
+                '<span style="color:#e67e22;">⤴ избыток</span>';
+        }
 
         // Аналитика
-        let priceB_for_entry = (shadowCarb * d.b[0] + shadowProt * d.b[1] + shadowVit * d.b[2]).toFixed(3);
-        document.getElementById('analysis_priceB').innerText = priceB_for_entry;
+        let priceBEntry = (shadowCarb * d.b[0] + shadowProt * d.b[1] + shadowVit * d.b[2]);
+        if (elements.priceBEntry) elements.priceBEntry.innerText = fmt(priceBEntry, 2);
+        if (elements.currentPriceB) elements.currentPriceB.innerText = fmt(d.b[3], 2);
 
-        let saveCarb = (5 * shadowCarb).toFixed(3);
-        let saveProt = (5 * shadowProt).toFixed(3);
-        document.getElementById('analysis_carbSaving').innerText = saveCarb;
-        document.getElementById('analysis_protSaving').innerText = saveProt;
-        document.getElementById('analysis_vitEffect').innerText = shadowVit < 0.001 ? 'не снижает издержки (тень=0)' : 'может снизить';
-        
-        document.getElementById('funcDisplay').innerText = `${d.a[3]}x₁ + ${d.b[3]}x₂ + ${d.c[3]}x₃`;
-        document.getElementById('constr1').innerHTML = `${d.a[0]}x₁ + ${d.b[0]}x₂ + ${d.c[0]}x₃ ≥ ${d.limits[0]}`;
-        document.getElementById('constr2').innerHTML = `${d.a[1]}x₁ + ${d.b[1]}x₂ + ${d.c[1]}x₃ ≥ ${d.limits[1]}`;
-        document.getElementById('constr3').innerHTML = `${d.a[2]}x₁ + ${d.b[2]}x₂ + ${d.c[2]}x₃ ≥ ${d.limits[2]}`;
+        let priceDiff = d.b[3] - priceBEntry;
+        if (elements.priceBDiff) {
+            elements.priceBDiff.innerHTML = priceDiff > 0.01 ?
+                `(дороже на ${fmt(priceDiff, 2)} руб.)` :
+                priceDiff < -0.01 ?
+                    `(дешевле на ${fmt(-priceDiff, 2)} руб.)` :
+                    '(равна предельной)';
+            elements.priceBDiff.style.color = priceDiff > 0.01 ? '#c0392b' : '#27ae60';
+        }
+
+        if (elements.savingCarb) elements.savingCarb.innerText = fmt(5 * shadowCarb, 2);
+        if (elements.savingProt) elements.savingProt.innerText = fmt(5 * shadowProt, 2);
+
+        // Распределение стоимости
+        let costA = d.a[3] * x1;
+        let costB = d.b[3] * x2;
+        let costC = d.c[3] * x3;
+        let total = costA + costB + costC;
+
+        let pctA = total > 0.001 ? (costA / total * 100) : 0;
+        let pctB = total > 0.001 ? (costB / total * 100) : 0;
+        let pctC = total > 0.001 ? (costC / total * 100) : 0;
+
+        if (elements.costADist) {
+            elements.costADist.style.width = pctA.toFixed(1) + '%';
+            elements.costADist.innerHTML = pctA.toFixed(1) + '%';
+        }
+        if (elements.costBDist) {
+            elements.costBDist.style.width = pctB.toFixed(1) + '%';
+            elements.costBDist.innerHTML = pctB.toFixed(1) + '%';
+        }
+        if (elements.costCDist) {
+            elements.costCDist.style.width = pctC.toFixed(1) + '%';
+            elements.costCDist.innerHTML = pctC.toFixed(1) + '%';
+        }
+        if (elements.costAPct) elements.costAPct.innerText = pctA.toFixed(1) + '%';
+        if (elements.costBPct) elements.costBPct.innerText = pctB.toFixed(1) + '%';
+        if (elements.costCPct) elements.costCPct.innerText = pctC.toFixed(1) + '%';
+
+        // Обновление графиков
+        updateCharts(x1, x2, x3, factCarbs, factProt, factVit, d.limits, shadowCarb, shadowProt, shadowVit);
+
+        // console.log('Пересчет завершен');
     }
 
-    // Сброс к варианту 7 (оригинальные значения)
+    // Сброс к варианту 7
     function resetToVariant7() {
-        document.getElementById('a_carbs').value = 90;
-        document.getElementById('a_prot').value = 30;
-        document.getElementById('a_vit').value = 10;
-        document.getElementById('a_price').value = 84;
-        document.getElementById('b_carbs').value = 20;
-        document.getElementById('b_prot').value = 80;
-        document.getElementById('b_vit').value = 20;
-        document.getElementById('b_price').value = 72;
-        document.getElementById('c_carbs').value = 40;
-        document.getElementById('c_prot').value = 60;
-        document.getElementById('c_vit').value = 60;
-        document.getElementById('c_price').value = 60;
-        document.getElementById('limit_carbs').value = 200;
-        document.getElementById('limit_prot').value = 180;
-        document.getElementById('limit_vit').value = 150;
+        document.getElementById('a_carbs').value = '90';
+        document.getElementById('a_prot').value = '30';
+        document.getElementById('a_vit').value = '10';
+        document.getElementById('a_price').value = '84';
+        document.getElementById('b_carbs').value = '20';
+        document.getElementById('b_prot').value = '80';
+        document.getElementById('b_vit').value = '20';
+        document.getElementById('b_price').value = '72';
+        document.getElementById('c_carbs').value = '40';
+        document.getElementById('c_prot').value = '60';
+        document.getElementById('c_vit').value = '60';
+        document.getElementById('c_price').value = '60';
+        document.getElementById('limit_carbs').value = '200';
+        document.getElementById('limit_prot').value = '180';
+        document.getElementById('limit_vit').value = '150';
         recalcSolution();
     }
 
-    function saveToMy() {
+    function saveToLocal() {
         const data = getInputs();
-        localStorage.setItem('variant7_feed', JSON.stringify(data));
-        alert('Данные сохранены в localStorage');
+        localStorage.setItem('feedData', JSON.stringify(data));
+        alert('Данные сохранены!!!');
     }
 
-    function loadFromMySQL() {
-        const saved = localStorage.getItem('variant7_feed');
+    function loadFromLocal() {
+        const saved = localStorage.getItem('feedData');
         if (saved) {
             try {
                 const d = JSON.parse(saved);
@@ -179,20 +369,62 @@
                 document.getElementById('limit_prot').value = d.limits[1];
                 document.getElementById('limit_vit').value = d.limits[2];
                 recalcSolution();
-                alert('Данные загружены');
-            } catch (e) { }
+                alert('Данные загружены!!!');
+            } catch (e) {
+                alert('Ошибка при загрузке!!!');
+            }
         } else {
             resetToVariant7();
         }
     }
 
-    // Привязка событий
     window.addEventListener('load', () => {
-        resetToVariant7(); // начальное заполнение
+        console.log('Страница загружена, инициализация...');
 
-        document.getElementById('recalcBtn').addEventListener('click', recalcSolution);
-        document.getElementById('resetToDefaultBtn').addEventListener('click', resetToVariant7);
-        document.getElementById('saveToMy').addEventListener('click', saveToMy);
-        document.getElementById('loadFromMySQLbtn').addEventListener('click', loadFromMySQL);
+        // Проверяем наличие всех необходимых элементов
+        const requiredIds = [
+            'a_carbs', 'a_prot', 'a_vit', 'a_price',
+            'b_carbs', 'b_prot', 'b_vit', 'b_price',
+            'c_carbs', 'c_prot', 'c_vit', 'c_price',
+            'limit_carbs', 'limit_prot', 'limit_vit',
+            'recalcBtn', 'resetToDefaultBtn', 'saveToLocalBtn', 'loadFromLocalBtn'
+        ];
+
+        requiredIds.forEach(id => {
+            if (!document.getElementById(id)) {
+                console.warn(`Элемент с id "${id}" не найден!`);
+            }
+        });
+
+        resetToVariant7();
+
+        const recalcBtn = document.getElementById('recalcBtn');
+        if (recalcBtn) {
+            recalcBtn.addEventListener('click', recalcSolution);
+        } else {
+            console.error('Кнопка пересчета не найдена!');
+        }
+
+        const resetBtn = document.getElementById('resetToDefaultBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', resetToVariant7);
+        }
+
+        const saveBtn = document.getElementById('saveToLocalBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveToLocal);
+        }
+
+        const loadBtn = document.getElementById('loadFromLocalBtn');
+        if (loadBtn) {
+            loadBtn.addEventListener('click', loadFromLocal);
+        }
+
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('change', recalcSolution);
+        });
+
+        // console.log('Инициализация завершена');
     });
 })();
