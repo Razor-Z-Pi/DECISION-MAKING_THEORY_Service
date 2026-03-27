@@ -8,16 +8,12 @@
 }
 
 body {
-    background: linear-gradient(135deg, #56c5a4 0%, #37b848 100%);
+    background: linear-gradient(135deg, #b1ea66 0%, #4ba26c 100%);
     min-height: 100vh;
     padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .container {
-    width: 100%;
     max-width: 1400px;
     margin: 0 auto;
 }
@@ -52,7 +48,6 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    white-space: nowrap;
 }
 
 .tab-button::before {
@@ -63,17 +58,17 @@ body {
     transform: translateX(-50%);
     width: 0;
     height: 3px;
-    background: linear-gradient(90deg, #25b187, #4ba265);
+    background: linear-gradient(90deg, #a1ea66, #4ba24b);
     transition: width 0.3s ease;
 }
 
 .tab-button:hover {
-    color: #25b187;
+    color: #66eac2;
     background: rgba(102, 126, 234, 0.1);
 }
 
 .tab-button.active {
-    color: #25b187;
+    color: #66ea99;
     background: rgba(102, 126, 234, 0.15);
 }
 
@@ -114,6 +109,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    background: #f5f5f5;
 }
 
 .iframe-container iframe {
@@ -129,26 +125,25 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    visibility: hidden;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 10;
     transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
 }
 
-.loading-overlay.active {
-    opacity: 1;
-    visibility: visible;
+.loading-overlay.hidden {
+    display: none;
 }
 
 .spinner {
     width: 50px;
     height: 50px;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #25b187;
+    border-top: 4px solid #66eab7;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -165,19 +160,28 @@ body {
 
 .error-message {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: white;
-    padding: 30px;
-    border-radius: 16px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.error-message.hidden {
     display: none;
 }
 
-.error-message.active {
-    display: block;
+.error-message>div {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .error-message h3 {
@@ -189,11 +193,12 @@ body {
 .error-message p {
     color: #666;
     margin-bottom: 20px;
+    line-height: 1.6;
 }
 
 .error-message button {
     padding: 10px 30px;
-    background: linear-gradient(135deg, #eab566, #a2584b);
+    background: linear-gradient(135deg, #66ea92, #4ba279);
     color: white;
     border: none;
     border-radius: 25px;
@@ -210,7 +215,7 @@ body {
 .add-site-btn {
     margin-left: auto;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #66eabe, #4ba25e);
+    background: linear-gradient(135deg, #66ea8e, #4ba272);
     color: white;
     border: none;
     border-radius: 12px;
@@ -251,6 +256,7 @@ body {
     width: 90%;
     max-width: 500px;
     animation: slideIn 0.3s ease;
+    position: relative;
 }
 
 @keyframes slideIn {
@@ -271,9 +277,10 @@ body {
     font-size: 28px;
 }
 
-.modal-content input {
+.modal-content input,
+.modal-content textarea {
     width: 100%;
-    padding: 15px;
+    padding: 12px;
     margin-bottom: 15px;
     border: 2px solid #e0e0e0;
     border-radius: 12px;
@@ -281,14 +288,21 @@ body {
     transition: border-color 0.3s ease;
 }
 
-.modal-content input:focus {
+.modal-content input:focus,
+.modal-content textarea:focus {
     outline: none;
     border-color: #667eea;
 }
 
+.modal-content textarea {
+    min-height: 200px;
+    font-family: monospace;
+    resize: vertical;
+}
+
 .modal-content button {
-    padding: 15px 30px;
-    background: linear-gradient(135deg, #66ea87, #4ba25e);
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #66ea78, #4ba281);
     color: white;
     border: none;
     border-radius: 12px;
@@ -305,16 +319,48 @@ body {
 
 .close-modal {
     position: absolute;
-    top: 20px;
+    top: 15px;
     right: 20px;
     font-size: 30px;
     cursor: pointer;
-    color: #666;
+    color: #999;
     transition: color 0.3s ease;
+    background: none;
+    border: none;
+    width: auto;
+    padding: 0;
 }
 
 .close-modal:hover {
     color: #e74c3c;
+}
+
+.site-info {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.site-info p {
+    color: #666;
+    font-size: 14px;
+}
+
+.site-info strong {
+    color: #667eea;
+}
+
+.file-upload-area {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #ddd;
+    text-align: center;
+}
+
+.file-upload-area input {
+    margin: 10px 0;
 }
 
 @media (max-width: 768px) {
@@ -355,19 +401,4 @@ body {
     .iframe-container {
         height: 350px;
     }
-}
-
-.site-info {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-bottom: 1px solid rgba(102, 126, 234, 0.3);
-}
-
-.site-info p {
-    color: #666;
-    font-size: 14px;
-}
-
-.site-info strong {
-    color: #667eea;
 }

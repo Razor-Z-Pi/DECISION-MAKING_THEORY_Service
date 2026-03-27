@@ -8,6 +8,17 @@
 </head>
 <body>
     <div class="container">
+
+        <div class="modal" id="editModal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal('editModal')">&times;</span>
+                <h2>Редактировать сайт</h2>
+                <input type="text" id="editTitle" placeholder="Название сайта">
+                <textarea id="editHtml" placeholder="HTML код" rows="15"></textarea>
+                <button onclick="saveEdit()">Сохранить</button>
+            </div>
+        </div>
+
         <div class="tabs-container">
             <div class="tabs-header">
                 <button class="tab-button active" data-tab="tab1">Главная</button>
@@ -75,7 +86,7 @@
                             <p>Не удалось загрузить сайт из папки site3/</p>
                             <button onclick="loadTab('tab4')">Повторить</button>
                         </div>
-                        <iframe src="site3/index.html" title="Сайт 3" onload="hideLoading('site3')" onerror="showError('site3')"></iframe>
+                        <iframe src="./three_pholder/index.html" title="Сайт 3" onload="hideLoading('site3')" onerror="showError('site3')"></iframe>
                     </div>
                 </div>
             </div>

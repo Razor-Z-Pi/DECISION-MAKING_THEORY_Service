@@ -1,0 +1,229 @@
+*,
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background: #f4f7fc;
+    color: #1a2c3e;
+    padding: 2rem 1.5rem;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #0b3b5f, #1b6b87);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.3px;
+}
+
+.sub {
+    color: #2c5a6e;
+    margin-top: 0.4rem;
+    border-left: 4px solid #2c9b9b;
+    padding-left: 1rem;
+    font-weight: 500;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: 1.8rem;
+    margin-bottom: 2rem;
+}
+
+/* Карточки таблиц и списков */
+.card {
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.card-header {
+    background: #f9fbfd;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2edf2;
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.badge-pareto {
+    background: #2c9b9b20;
+    color: #166b6b;
+    border-radius: 40px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.8rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    padding: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 0.9rem 0.8rem;
+    border-bottom: 1px solid #eef2f5;
+}
+
+th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #1f4e6e;
+    position: sticky;
+    top: 0;
+}
+
+.pareto-row {
+    background-color: #e1f5f0;
+    font-weight: 500;
+    border-left: 3px solid #1e8f8f;
+}
+
+.dominated-row {
+    opacity: 0.6;
+    background: #fef6e0;
+}
+
+.supplier-name {
+    font-weight: 600;
+}
+
+/* График */
+.chart-container {
+    padding: 1rem;
+    height: 320px;
+    position: relative;
+}
+
+/* Секция what-if */
+.whatif-section {
+    background: white;
+    border-radius: 1.5rem;
+    margin-top: 1.8rem;
+    padding: 1.2rem 1.8rem 1.8rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2edf2;
+}
+
+.slider-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 1.2rem 0 1.5rem;
+    align-items: center;
+}
+
+.slider-item {
+    flex: 1;
+    min-width: 150px;
+}
+
+.slider-item label {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: #2c9b9b;
+}
+
+.weight-buttons {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.pill-btn {
+    background: #ecf3f7;
+    border: none;
+    border-radius: 40px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.1s;
+}
+
+.pill-btn.active {
+    background: #1e8f8f;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recommend-card {
+    background: #eef9f9;
+    border-radius: 1rem;
+    padding: 1rem 1.5rem;
+    margin-top: 1rem;
+    border-left: 5px solid #1e8f8f;
+}
+
+.highlight {
+    font-weight: 700;
+    color: #166b6b;
+}
+
+/* адаптив */
+@media (max-width: 860px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    body {
+        padding: 1rem;
+    }
+}
+
+footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #6b8d9b;
+    margin-top: 2rem;
+    border-top: 1px solid #cde3ea;
+    padding-top: 1.5rem;
+}
+
+button {
+    background: none;
+    border: none;
+}
+
+.info-tip {
+    cursor: help;
+    border-bottom: 1px dashed;
+}

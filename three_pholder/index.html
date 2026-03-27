@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+        <title>SmartVendor (^_^) Парето-оптимальные поставщики</title>
+        <link rel="stylesheet" href="./style/style.css">
+    </head>
+    <body>
+        <div class="container">
+                <div class="header">
+                    <h1>SmartVendor (^_^) Парето-фронт закупок</h1>
+                    <div class="sub">Многокритериальный отбор поставщиков: цена &#8595;, срок &#8595;, рейтинг &#8593;, мин. партия &#8595;</div>
+                </div>
+
+                <div class="dashboard">
+                    <!-- Таблица поставщиков -->
+                    <div class="card">
+                        <div class="card-header">
+                            Все поставщики
+                            <span class="badge-pareto" id="paretoCountBadge">—</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="supplierTable">
+                                <thead>
+                                    <tr><th>Поставщик</th><th>Цена ($)</th><th>Срок (дн)</th><th>Рейтинг (1-5)</th><th>Мин. партия</th><th>Статус</th></tr>
+                                </thead>
+                                <tbody id="supplierTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Визуализация 2D + карточка -->
+                    <div class="card">
+                        <div class="card-header">
+                            Фронт Парето (цена vs срок)
+                            <span style="font-size:0.7rem; margin-left:auto;">кликните по точке -> детали</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="paretoChart" width="400" height="300" style="max-height:280px; width:100%"></canvas>
+                        </div>
+                        <div id="clickInfo" style="padding: 0.5rem 1rem 1rem 1rem; font-size:0.85rem; border-top:1px solid #ecf3f7;">
+                            Нажмите на точку поставщика для подробной карточки.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="whatif-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                        <h3 style="font-size: 1.2rem;">Инструмент «Что если?»</h3>
+                        <span style="font-size:0.75rem; color:#3f7e8c;">Выберите приоритет бизнеса → подсветим лучший вариант из Парето-фронта</span>
+                    </div>
+                    <div class="weight-buttons">
+                        <button class="pill-btn" data-preset="balanced">Сбалансированный</button>
+                        <button class="pill-btn" data-preset="speed">Скорость (срок минимум)</button>
+                        <button class="pill-btn" data-preset="price">Цена минимум</button>
+                        <button class="pill-btn" data-preset="quality">Надежность (рейтинг)</button>
+                        <button class="pill-btn" data-preset="smallLot">Мин. партия</button>
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-item"><label>Цена (вес) <span id="weightPriceVal">0.25</span></label><input type="range" id="weightPrice" min="0" max="1" step="0.01" value="0.25"></div>
+                        <div class="slider-item"><label>Срок (вес) <span id="weightTimeVal">0.25</span></label><input type="range" id="weightTime" min="0" max="1" step="0.01" value="0.25"></div>
+                        <div class="slider-item"><label>Рейтинг (вес) <span id="weightRatingVal">0.25</span></label><input type="range" id="weightRating" min="0" max="1" step="0.01" value="0.25"></div>
+                    <div class="slider-item"><label>Мин. партия (вес) <span id="weightLotVal">0.25</span></label><input type="range" id="weightLot" min="0" max="1" step="0.01" value="0.25"></div>
+                </div>
+                <div id="recommendationBox" class="recommend-card">
+                    <strong>Рекомендация:</strong> настройте веса или выберите сценарий — система оценит Парето-оптимальных поставщиков с учётом ваших приоритетов.
+                </div>
+            </div>
+            <footer>
+                Принцип Парето: отсеиваем доминируемые варианты, оставляя только эффективный фронт компромиссов. Выбирайте рационально.
+            </footer>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script src="./js/app.js"></script>
+    </body>
+</html>
