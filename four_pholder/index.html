@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>СППР - Метод последовательных уступок - Редактируемая модель</title>
+    <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+<div class="glass-panel">
+  <h1>
+    ВЫБОР СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ
+    <span>МПУ</span>
+  </h1>
+  <div class="subtitle">
+    Редактируйте значения - Метод последовательных уступок
+  </div>
+
+  <!-- Блок управления уступками -->
+  <div class="delta-controls">
+    <div class="delta-item">Δ₁ (стоимость) <input id="delta1Input" type="number" value="200" step="10" min="0"></div>
+    <div class="delta-item">Δ₂ (разрешение) <input id="delta2Input" type="number" value="2" step="0.1" min="0"></div>
+    <div class="delta-item">Δ₃ (надёжность) <input id="delta3Input" type="number" value="5" step="1" min="0"></div>
+  </div>
+
+  <div class="table-wrapper">
+    <table id="decisionTable">
+      <thead>
+         <tr><th>Альтернатива</th><th>f₁ (тыс.₽) min</th><th>f₂ (Мпикс) max</th><th>f₃ (тыс.ч) max</th><th>f₄ (баллы) max</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="step-panel">
+    <button class="btn" id="nextStepBtn">=> Следующий шаг</button>
+    <button class="btn reset-btn" id="resetBtn">Сброс</button>
+    <div class="step-indicator" id="stepDisplay">Шаг 0 / 4</div>
+  </div>
+
+  <div id="finalResult" class="result-box">
+    Ожидание решения...
+  </div>
+</div>
+
+<script src="./script/app.js"></script>
+</body>
+</html>
