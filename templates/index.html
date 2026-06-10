@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Навигатор по сайтам!!!</title>
+    <style>
+        *,
+        *::after,
+        *::before {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #64facd 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tabs-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: #e9ecef;
+            color: #666;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background: #dee2e6;
+            color: #667eea;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #f3f163, #764ba2);
+            color: white;
+        }
+
+        .add-site-btn {
+            margin-left: auto;
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .add-site-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .site-info {
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .site-info strong {
+            color: #2248f3;
+        }
+
+        .tab-content {
+            padding: 20px;
+            background: white;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .error-message.hidden {
+            display: none;
+        }
+
+        .error-card {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .error-card h3 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .error-card button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-content input,
+        .modal-content select,
+        .modal-content textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .modal-content textarea {
+            min-height: 200px;
+            font-family: monospace;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #5977ff, #4ba24f);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .tabs-header {
+                flex-direction: column;
+            }
+            .tab-button, .add-site-btn {
+                width: 100%;
+                text-align: center;
+            }
+            .add-site-btn {
+                margin-left: 0;
+            }
+            .iframe-container {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs-container">
+            <div class="tabs-header" id="tabsHeader"></div>
+            <div class="site-info" id="siteInfo"></div>
+            <div class="tab-content" id="tabContent"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления сайта -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('addModal')">&times;</span>
+            <h2>+ Добавить новый сайт</h2>
+            <input type="text" id="siteName" placeholder="Название сайта">
+            <select id="siteType">
+                <option value="folder">Сайт из папки</option>
+                <option value="embedded">Встроенный сайт</option>
+            </select>
+            <input type="text" id="sitePath" placeholder="Имя папки (например: my_site)">
+            <textarea id="siteHtml" placeholder="HTML код (для встроенного сайта)" style="display:none;"></textarea>
+            <button onclick="addNewSite()">Создать сайт</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('editModal')">&times;</span>
+            <h2>Редактировать сайт</h2>
+            <input type="text" id="editTitle" placeholder="Название">
+            <textarea id="editHtml" placeholder="HTML код" rows="15"></textarea>
+            <button onclick="saveEdit()">Сохранить</button>
+        </div>
+    </div>
+
+    <script>
+        let sitesConfig = {{ sites_config|tojson }};
+        let currentEditTab = null;
+
+        function renderTabs() {
+            const header = document.getElementById('tabsHeader');
+            const content = document.getElementById('tabContent');
+            const info = document.getElementById('siteInfo');
+            
+            header.innerHTML = '';
+            content.innerHTML = '';
+            
+            let folders = [];
+            
+            for (let [tabId, site] of Object.entries(sitesConfig)) {
+                // Кнопка вкладки
+                const btn = document.createElement('button');
+                btn.className = 'tab-button';
+                if (tabId === 'tab1') btn.classList.add('active');
+                btn.textContent = tabId === 'tab1' ? ' ' + site.name : ' ' + site.name;
+                btn.onclick = () => switchTab(tabId);
+                btn.setAttribute('data-tab', tabId);
+                header.appendChild(btn);
+                
+                // Панель вкладки
+                const pane = document.createElement('div');
+                pane.className = 'tab-pane';
+                if (tabId === 'tab1') pane.classList.add('active');
+                pane.id = tabId;
+                pane.innerHTML = `
+                    <div class="iframe-container">
+                        <div class="loading-overlay" id="loading-${tabId}">
+                            <div class="spinner"></div>
+                        </div>
+                        <div class="error-message hidden" id="error-${tabId}">
+                            <div class="error-card">
+                                <h3>Ошибка загрузки!!!</h3>
+                                <button onclick="loadTab('${tabId}')">Повторить</button>
+                            </div>
+                        </div>
+                        <iframe id="frame-${tabId}" title="${site.name}"></iframe>
+                    </div>
+                `;
+                content.appendChild(pane);
+                
+                if (site.type === 'folder' && site.path) {
+                    folders.push(site.path.split(/[/\\]/).pop());
+                }
+            }
+            
+            // Кнопка добавления
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-site-btn';
+            addBtn.textContent = '+ Добавить сайт';
+            addBtn.onclick = () => openModal('addModal');
+            header.appendChild(addBtn);
+            
+            // Информация о папках
+            if (folders.length > 0) {
+                info.innerHTML = `<strong>Папки с сайтами:</strong> ${folders.join(', ')}`;
+            } else {
+                info.innerHTML = `<strong>Папки с сайтами:</strong> пока нет`;
+            }
+        }
+
+        async function loadTab(tabId) {
+            const loading = document.getElementById(`loading-${tabId}`);
+            const error = document.getElementById(`error-${tabId}`);
+            const iframe = document.getElementById(`frame-${tabId}`);
+            
+            if (loading) loading.classList.remove('hidden');
+            if (error) error.classList.add('hidden');
+            
+            try {
+                console.log(`Загружаем вкладку: ${tabId}`);
+                const response = await fetch(`/api/site/${tabId}`);
+                const data = await response.json();
+                
+                if (data.html) {
+                    iframe.srcdoc = data.html;
+                    if (loading) loading.classList.add('hidden');
+                    console.log(`Успешно загружено, длина HTML: ${data.html.length}`);
+                } else {
+                    throw new Error('Нет содержимого');
+                }
+            } catch (err) {
+                console.error('Ошибка загрузки:', err);
+                if (loading) loading.classList.add('hidden');
+                if (error) error.classList.remove('hidden');
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            loadTab(tabId);
+        }
+
+        function editCurrentSite() {
+            const activeTab = document.querySelector('.tab-pane.active').id;
+            currentEditTab = activeTab;
+            const site = sitesConfig[activeTab];
+            document.getElementById('editTitle').value = site.name;
+            
+            const iframe = document.getElementById(`frame-${activeTab}`);
+            document.getElementById('editHtml').value = iframe.srcdoc;
+            
+            openModal('editModal');
+        }
+
+        async function saveEdit() {
+            const newTitle = document.getElementById('editTitle').value;
+            const newHtml = document.getElementById('editHtml').value;
+            
+            const response = await fetch(`/api/sites/${currentEditTab}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newTitle, content: newHtml })
+            });
+            
+            if (response.ok) {
+                sitesConfig[currentEditTab].name = newTitle;
+                const btn = document.querySelector(`[data-tab="${currentEditTab}"]`);
+                btn.textContent = currentEditTab === 'tab1' ? ' ' + newTitle : ' ' + newTitle;
+                
+                const iframe = document.getElementById(`frame-${currentEditTab}`);
+                iframe.srcdoc = newHtml;
+                
+                closeModal('editModal');
+                alert('Сохранено!');
+            }
+        }
+
+        async function addNewSite() {
+            const name = document.getElementById('siteName').value;
+            const type = document.getElementById('siteType').value;
+            const path = document.getElementById('sitePath').value;
+            const html = document.getElementById('siteHtml').value;
+            
+            if (!name) {
+                alert('Введите название сайта');
+                return;
+            }
+            
+            const response = await fetch('/api/sites', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, type, path, content: html })
+            });
+            
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Ошибка при создании сайта');
+            }
+        }
+
+        async function uploadFileToCurrentTab() {
+            const activeTab = document.querySelector('.tab-pane.active').id;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.html,.htm';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('tab_id', activeTab);
+                
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const iframe = document.getElementById(`frame-${activeTab}`);
+                    iframe.srcdoc = data.content;
+                    alert('Файл загружен!');
+                    location.reload();
+                } else {
+                    alert('Ошибка загрузки файла');
+                }
+            };
+            input.click();
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function toggleSiteType() {
+            const type = document.getElementById('siteType').value;
+            const pathInput = document.getElementById('sitePath');
+            const htmlArea = document.getElementById('siteHtml');
+            
+            if (type === 'folder') {
+                pathInput.style.display = 'block';
+                htmlArea.style.display = 'none';
+            } else {
+                pathInput.style.display = 'none';
+                htmlArea.style.display = 'block';
+            }
+        }
+
+        // Проверка наличия сайтов в папках
+        async function checkSites() {
+            const response = await fetch('/debug-sites');
+            const data = await response.json();
+            console.log('Сайты в папках:', data);
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTabs();
+            setTimeout(() => loadTab('tab1'), 100);
+            checkSites();
+            
+            document.getElementById('siteType').addEventListener('change', toggleSiteType);
+            toggleSiteType();
+            
+            window.editCurrentSite = editCurrentSite;
+            window.uploadFileToCurrentTab = uploadFileToCurrentTab;
+        });
+    </script>
+</body>
+</html>

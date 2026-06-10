@@ -1,0 +1,27 @@
+{
+  "tab1": {
+    "name": "Главная",
+    "path": null,
+    "type": "default"
+  },
+  "tab2": {
+    "name": "four_pholder",
+    "path": "sites\\four_pholder",
+    "type": "folder"
+  },
+  "tab3": {
+    "name": "one_pholder",
+    "path": "sites\\one_pholder",
+    "type": "folder"
+  },
+  "tab4": {
+    "name": "three_pholder",
+    "path": "sites\\three_pholder",
+    "type": "folder"
+  },
+  "tab5": {
+    "name": "two_pholder",
+    "path": "sites\\two_pholder",
+    "type": "folder"
+  }
+}
